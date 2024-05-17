@@ -1,5 +1,5 @@
 use config::{File, FileFormat};
-use serde::{Deserialize, Deserializer};
+use serde::Deserialize;
 use std::str::FromStr;
 
 lazy_static::lazy_static! {
