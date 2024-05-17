@@ -1,0 +1,4 @@
+set: vb
+variant: short
+deterministic: false
+supercop: false
