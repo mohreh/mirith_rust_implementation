@@ -1,25 +1,27 @@
-// Copyright 2023 Carlo Sanna, Javier Verbel, and Floyd Zweydinger.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+use crate::config::CONFIG;
 
-use crate::config::MIRITH_MODE;
+#[cfg(not(feature = "hypercube"))]
+const fn init(mode: u8) -> (usize, usize, usize) {
+    match mode {
+        0 => (129, 145, 7877),   /* Ia, fast. */
+        1 => (129, 145, 5673),   /* Ia, short. */
+        2 => (144, 160, 9105),   /* Ib, fast. */
+        3 => (144, 160, 6309),   /* Ib, short. */
+        4 => (205, 229, 17139),  /* IIIa, fast. */
+        5 => (205, 229, 12440),  /* IIIa, short. */
+        6 => (205, 229, 18459),  /* IIIb, fast. */
+        7 => (205, 229, 13136),  /* IIIb, short. */
+        8 => (253, 285, 31468),  /* Va, fast. */
+        9 => (253, 285, 21795),  /* Va, short. */
+        10 => (274, 306, 34059), /* Vb, fast. */
+        11 => (274, 306, 23182), /* Vb, short. */
+        _ => panic!("MIRITH_MODE not implemented!"),
+    }
+}
 
-// pub const CRYPTO_PUBLICKEYBYTES: usize;
-// pub const CRYPTO_SECRETKEYBYTES: usize;
-// pub const CRYPTO_BYTES: usize;
-
-const fn init() -> (usize, usize, usize) {
-    match MIRITH_MODE {
+#[cfg(feature = "hypercube")]
+const fn init(mode: u8) -> (usize, usize, usize) {
+    match mode {
         0 => (129, 145, 7877),   /* Ia, fast. */
         1 => (129, 145, 5673),   /* Ia, short. */
         2 => (129, 145, 5036),   /* Ia, shorter. */
@@ -48,8 +50,10 @@ const fn init() -> (usize, usize, usize) {
     }
 }
 
-const INIT: (usize, usize, usize) = init();
+lazy_static::lazy_static! {
+    static ref INIT_VALUES: (usize, usize, usize) = init(CONFIG.mode);
 
-pub const CRYPTO_PUBLICKEYBYTES: usize = INIT.0;
-pub const CRYPTO_SECRETKEYBYTES: usize = INIT.1;
-pub const CRYPTO_BYTES: usize = INIT.2;
+    pub static ref CRYPTO_PUBLICKEYBYTES: usize = INIT_VALUES.0;
+    pub static ref CRYPTO_SECRETKEYBYTES: usize = INIT_VALUES.1;
+    pub static ref CRYPTO_BYTES: usize = INIT_VALUES.2;
+}

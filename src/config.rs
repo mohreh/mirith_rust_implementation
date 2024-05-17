@@ -2,11 +2,12 @@ use config::{File, FileFormat};
 use serde::{Deserialize, Deserializer};
 use std::str::FromStr;
 
-pub const MIRITH_MODE: u8 = 0;
+lazy_static::lazy_static! {
+    pub static ref CONFIG: Config = get_configuration().expect("Failed to load configuration");
+}
 
 pub const CRYPTO_ALGNAME: &str = "MiRitH";
 
-// Define an enum for the standards
 #[derive(Deserialize, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Set {
     Ia,
@@ -17,7 +18,6 @@ pub enum Set {
     Vb,
 }
 
-// Define an enum for the hypercube versions
 #[derive(Deserialize, PartialEq, Eq, Clone, Copy, Debug)]
 pub enum Variant {
     Fast,
@@ -71,13 +71,13 @@ impl FromStr for Variant {
     }
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Clone, Debug)]
 pub struct Config {
     pub set: Set,
     pub variant: Variant,
     pub deterministic: bool,
     pub supercop: bool,
-    #[serde(deserialize_with = "deserialize_mode", default)]
+    #[serde(default)]
     pub mode: u8,
 }
 
@@ -103,12 +103,6 @@ pub fn get_configuration() -> Result<Config, config::ConfigError> {
             config.set as u8 * 4 + config.variant as u8
         }
     };
-    Ok(config)
-}
 
-fn deserialize_mode<'de, D>(_deserializer: D) -> Result<u8, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    Ok(0)
+    Ok(config)
 }
