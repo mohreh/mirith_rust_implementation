@@ -13,21 +13,11 @@ neon = []
 # cortex-m4 = []
 hypercube = []
 
-ia = []
-ib = []
-iiia = []
-iiib = []
-va = []
-vb = []
-
-fast = []
-short = []
-shorter = []
-shortest = []
-
 [dependencies]
+base64 = "0.22.1"
 config = "0.14.0"
 lazy_static = "1.4.0"
+# openssl = "0.10.64"
 rand = "0.8.5"
 rand_chacha = "0.3.1"
 serde = { version = "1.0.202", features = ["derive"] }
