@@ -10,14 +10,15 @@ reference = []
 optimized = []
 avx2 = []
 neon = []
-# cortex-m4 = []
+cortex-m4 = []
 hypercube = []
+deterministic = []
 
 [dependencies]
 base64 = "0.22.1"
 lazy_static = "1.4.0"
 openssl = "0.10.64"
-rand = "0.8.5"
+rand = { version = "0.8.5", features = ["small_rng"] }
 rand_chacha = "0.3.1"
 
 [dev-dependencies]

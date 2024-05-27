@@ -5,3 +5,4 @@ pub mod fips202;
 pub mod hash;
 pub mod params;
 pub mod prng;
+pub mod random;
