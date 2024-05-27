@@ -1,4 +1,4 @@
-use crate::config::CONFIG;
+use crate::config::MODE;
 
 #[cfg(not(feature = "hypercube"))]
 const fn init(mode: u8) -> ParamsTuple {
@@ -67,21 +67,18 @@ type ParamsTuple = (
     usize,
 );
 
-lazy_static::lazy_static! {
-    static ref INIT: ParamsTuple = init(CONFIG.mode);
-
-    pub static ref PAR_Q: usize = INIT.0;
-    pub static ref PAR_M: usize = INIT.1;
-    pub static ref PAR_N: usize = INIT.2;
-    pub static ref PAR_K: usize = INIT.3;
-    pub static ref PAR_R: usize = INIT.4;
-    pub static ref PAR_S: usize = INIT.5;
-    pub static ref TAU: usize = INIT.6;
-    pub static ref N_PARTIES: usize = INIT.7;
-    pub static ref D_DIMENSION: usize = INIT.8;
-    pub static ref N_PARTIES_ROUND: usize = INIT.9;
-    pub static ref SEED_SIZE: usize = INIT.10;
-    pub static ref HASH_SIZE: usize = INIT.11;
-    pub static ref TREE_HEIGHT: usize = INIT.12;
-    pub static ref TREE_N_NODES: usize = INIT.13;
-}
+const INIT: ParamsTuple = init(MODE);
+pub const PAR_Q: usize = INIT.0;
+pub const PAR_M: usize = INIT.1;
+pub const PAR_N: usize = INIT.2;
+pub const PAR_K: usize = INIT.3;
+pub const PAR_R: usize = INIT.4;
+pub const PAR_S: usize = INIT.5;
+pub const TAU: usize = INIT.6;
+pub const N_PARTIES: usize = INIT.7;
+pub const D_DIMENSION: usize = INIT.8;
+pub const N_PARTIES_ROUND: usize = INIT.9;
+pub const SEED_SIZE: usize = INIT.10;
+pub const HASH_SIZE: usize = INIT.11;
+pub const TREE_HEIGHT: usize = INIT.12;
+pub const TREE_N_NODES: usize = INIT.13;

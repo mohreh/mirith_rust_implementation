@@ -12,6 +12,6 @@ pub fn get_second_challenges<const TAU: usize, const HASH_SIZE: usize>(
 
     for i_star_elem in i_star.iter_mut() {
         let r = prng.gen::<usize>();
-        *i_star_elem = r % *N_PARTIES_ROUND;
+        *i_star_elem = r % N_PARTIES_ROUND;
     }
 }

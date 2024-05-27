@@ -1,4 +1,4 @@
-use crate::config::CONFIG;
+use crate::config::MODE;
 
 #[cfg(not(feature = "hypercube"))]
 const fn init(mode: u8) -> (usize, usize, usize) {
@@ -50,10 +50,7 @@ const fn init(mode: u8) -> (usize, usize, usize) {
     }
 }
 
-lazy_static::lazy_static! {
-    static ref INIT_VALUES: (usize, usize, usize) = init(CONFIG.mode);
-
-    pub static ref CRYPTO_PUBLICKEYBYTES: usize = INIT_VALUES.0;
-    pub static ref CRYPTO_SECRETKEYBYTES: usize = INIT_VALUES.1;
-    pub static ref CRYPTO_BYTES: usize = INIT_VALUES.2;
-}
+const INIT_VALUES: (usize, usize, usize) = init(MODE);
+pub const CRYPTO_PUBLICKEYBYTES: usize = INIT_VALUES.0;
+pub const CRYPTO_SECRETKEYBYTES: usize = INIT_VALUES.1;
+pub const CRYPTO_BYTES: usize = INIT_VALUES.2;
