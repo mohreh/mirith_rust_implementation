@@ -4,3 +4,4 @@ pub mod config;
 pub mod fips202;
 pub mod hash;
 pub mod params;
+pub mod prng;

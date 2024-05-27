@@ -30,10 +30,10 @@ const RHO_OFFSETS: [usize; 25] = [
 const PI_INDEXES: [usize; 25] = [
     0, 10, 20, 5, 15, 16, 1, 11, 21, 6, 7, 17, 2, 12, 22, 23, 8, 18, 3, 13, 14, 24, 9, 19, 4,
 ];
-const SHAKE128_RATE: usize = 168;
-const SHAKE256_RATE: usize = 136;
-const SHA3_256_RATE: usize = 136;
-const SHA3_512_RATE: usize = 72;
+pub const SHAKE128_RATE: usize = 168;
+pub const SHAKE256_RATE: usize = 136;
+pub const SHA3_256_RATE: usize = 136;
+pub const SHA3_512_RATE: usize = 72;
 const NROUNDS: usize = 24;
 
 fn rol(a: u64, offset: u64) -> u64 {
@@ -54,7 +54,7 @@ fn store64(x: &mut [u8], u: u64) {
 
 #[derive(Default, Debug)]
 #[allow(dead_code)]
-struct KeccakState {
+pub struct KeccakState {
     state: [u64; 25],
     pos: usize,
     rate: usize,
@@ -69,7 +69,7 @@ impl KeccakState {
         }
     }
 
-    fn keccak_absorb(&mut self, in_bytes: &[u8]) -> usize {
+    pub fn keccak_absorb(&mut self, in_bytes: &[u8]) -> usize {
         let mut inlen = in_bytes.len();
         while self.pos + inlen >= self.rate {
             for i in self.pos..self.rate {
@@ -85,7 +85,12 @@ impl KeccakState {
         self.pos + inlen
     }
 
-    fn keccak_absorb_once(&mut self, mut in_bytes: &[u8], mut inlen: usize, p: u8) -> &mut Self {
+    pub fn keccak_absorb_once(
+        &mut self,
+        mut in_bytes: &[u8],
+        mut inlen: usize,
+        p: u8,
+    ) -> &mut Self {
         while inlen >= self.rate {
             for i in 0..self.rate / 8 {
                 self.state[i] ^= load64(&in_bytes[8 * i..8 * i + 8]);
@@ -396,7 +401,7 @@ impl KeccakState {
         // self
     }
 
-    fn keccak_squeeze(&mut self, out: &mut [u8], mut outlen: usize) -> usize {
+    pub fn keccak_squeeze(&mut self, out: &mut [u8], mut outlen: usize) -> usize {
         let mut idx = 0;
         while outlen > 0 {
             if self.pos == self.rate {
@@ -417,7 +422,7 @@ impl KeccakState {
         self.pos
     }
 
-    fn keccak_squeezeblocks(&mut self, mut out: &mut [u8], mut nblocks: usize) -> &mut Self {
+    pub fn keccak_squeezeblocks(&mut self, mut out: &mut [u8], mut nblocks: usize) -> &mut Self {
         while nblocks > 0 {
             self.keccak_f1600_state_permute();
             for i in 0..self.rate / 8 {
@@ -427,6 +432,16 @@ impl KeccakState {
             nblocks -= 1;
         }
         self
+    }
+
+    pub fn init(&mut self) {
+        self.state = Default::default();
+        self.pos = 0
+    }
+
+    pub fn keccak_finalize(&mut self, p: u8) {
+        self.state[self.pos / 8] ^= (p as u64) << (8 * (self.pos % 8));
+        self.state[(self.rate - 1) / 8] ^= 1u64 << 63;
     }
 }
 
