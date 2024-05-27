@@ -397,16 +397,22 @@ impl KeccakState {
     }
 
     fn keccak_squeeze(&mut self, out: &mut [u8], mut outlen: usize) -> usize {
+        let mut idx = 0;
         while outlen > 0 {
             if self.pos == self.rate {
                 self.keccak_f1600_state_permute();
                 self.pos = 0;
             }
-            for i in self.pos..std::cmp::min(self.rate, self.pos + outlen) {
-                out[i - self.pos] = (self.state[i / 8] >> (8 * (i % 8))) as u8;
+            let mut i = self.pos;
+            let mut w = i / 8;
+            while i < self.rate && i < self.pos + outlen {
+                store64(&mut out[idx..], self.state[w]);
+                i += 8;
+                w += 1;
+                idx += 8;
             }
-            outlen -= std::cmp::min(self.rate, self.pos + outlen) - self.pos;
-            self.pos = std::cmp::min(self.rate, self.pos + outlen);
+            outlen -= i - self.pos;
+            self.pos = i;
         }
         self.pos
     }
