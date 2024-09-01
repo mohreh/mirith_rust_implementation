@@ -5,13 +5,33 @@ pub fn randombytes<R>(target: &mut [u8]) {
 }
 
 #[cfg(feature = "deterministic")]
-mod prng {
+pub mod prng {
     use crate::hash::Seed;
     use rand::{rngs::SmallRng, RngCore, SeedableRng};
 
     static mut PRNG_SINGLETON: Option<SmallRng> = None;
 
-    pub fn init_prng(seed: Seed) {
+    // #[derive(Default)]
+    // struct Prng {
+    //     prng_singleton: Option<SmallRng>,
+    // }
+    //
+    // impl Prng {
+    //     pub fn new(seed: &Seed) {
+    //         let mut prng = Prng::default();
+    //         prng.prng_singleton = Some(SmallRng::from_seed(*seed));
+    //     }
+    //
+    //     pub fn gen_bytes(&mut self, out: &mut [u8], outlen: usize) {
+    //         if let Some(ref mut prng) = self.prng_singleton {
+    //             prng.fill_bytes(out);
+    //         } else {
+    //             panic!("PRNG not initialized!");
+    //         }
+    //     }
+    // }
+
+    pub fn prng_init(seed: Seed) {
         unsafe {
             PRNG_SINGLETON = Some(SmallRng::from_seed(seed));
         }
@@ -29,6 +49,6 @@ mod prng {
 }
 
 #[cfg(feature = "deterministic")]
-pub fn randombytes<R>(target: &mut [u8]) {
+pub fn randombytes(target: &mut [u8]) {
     prng::prng_bytes(target);
 }

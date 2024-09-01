@@ -62,7 +62,7 @@ pub struct KeccakState {
 
 #[allow(dead_code)]
 impl KeccakState {
-    fn new(rate: usize) -> Self {
+    pub fn new(rate: usize) -> Self {
         Self {
             rate,
             ..Default::default()
@@ -445,8 +445,7 @@ impl KeccakState {
     }
 }
 
-pub fn shake128(mut out: &mut [u8], in_bytes: &[u8]) {
-    let (inlen, mut outlen) = (in_bytes.len(), out.len());
+pub fn shake128(mut out: &mut [u8], mut outlen: usize, in_bytes: &[u8], inlen: usize) {
     let nblocks = outlen / SHAKE128_RATE;
     outlen -= nblocks * SHAKE128_RATE;
     out = &mut out[nblocks * SHAKE128_RATE..];
@@ -457,8 +456,7 @@ pub fn shake128(mut out: &mut [u8], in_bytes: &[u8]) {
         .keccak_squeeze(out, outlen);
 }
 
-pub fn shake256(mut out: &mut [u8], in_bytes: &[u8]) {
-    let (inlen, mut outlen) = (in_bytes.len(), out.len());
+pub fn shake256(mut out: &mut [u8], mut outlen: usize, in_bytes: &[u8], inlen: usize) {
     let nblocks = outlen / SHAKE256_RATE;
     outlen -= nblocks * SHAKE256_RATE;
     out = &mut out[nblocks * SHAKE256_RATE..];
@@ -468,8 +466,7 @@ pub fn shake256(mut out: &mut [u8], in_bytes: &[u8]) {
         .keccak_squeeze(out, outlen);
 }
 
-pub fn sha3_256(h: &mut [u8; 32], in_bytes: &[u8]) {
-    let inlen = in_bytes.len();
+pub fn sha3_256(h: &mut [u8; 32], in_bytes: &[u8], inlen: usize) {
     let mut state = KeccakState::new(SHA3_256_RATE);
     state
         .keccak_absorb_once(in_bytes, inlen, 0x06)
@@ -480,8 +477,7 @@ pub fn sha3_256(h: &mut [u8; 32], in_bytes: &[u8]) {
     }
 }
 
-pub fn sha3_512(h: &mut [u8; 64], in_bytes: &[u8]) {
-    let inlen = in_bytes.len();
+pub fn sha3_512(h: &mut [u8; 64], in_bytes: &[u8], inlen: usize) {
     let mut state = KeccakState::new(SHA3_512_RATE);
     state
         .keccak_absorb_once(in_bytes, inlen, 0x06)
@@ -489,4 +485,31 @@ pub fn sha3_512(h: &mut [u8; 64], in_bytes: &[u8]) {
     for i in 0..8 {
         store64(&mut h[8 * i..8 * i + 8], state.state[i]);
     }
+}
+
+pub fn shake256_init() -> KeccakState {
+    KeccakState::new(SHAKE256_RATE)
+}
+
+pub fn shake256_absorb(state: &mut KeccakState, input: &mut [u8], _inlen: usize) {
+    state.pos = state.keccak_absorb(input);
+}
+
+pub fn shake256_finalize(state: &mut KeccakState) {
+    state.keccak_finalize(0x1F);
+    state.pos = SHAKE256_RATE;
+}
+
+pub fn shake256_squeeze(state: &mut KeccakState, out: &mut [u8], outlen: usize) {
+    state.pos = state.keccak_squeeze(out, outlen)
+}
+
+pub fn shake256_absorb_once(state: &mut KeccakState, input: &mut [u8], inlen: usize) {
+    state.keccak_absorb_once(input, inlen, 0x1F);
+    state.pos = SHAKE256_RATE;
+}
+
+pub fn shake256_squeezeblocks(state: &mut KeccakState, out: &mut [u8], outlen: usize) {
+    state.keccak_squeeze(out, outlen);
+    // keccak_squeezeblocks(out, nblocks, state->s, SHAKE256_RATE);
 }

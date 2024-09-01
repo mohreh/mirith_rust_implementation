@@ -1,25 +1,35 @@
-use crate::params::{HASH_SIZE, SEED_SIZE};
 use crate::{
-    fips202::KeccakState,
+    fips202::{shake256_absorb, shake256_finalize, shake256_squeeze},
+    params::{HASH_SIZE, SEED_SIZE},
+};
+use crate::{
+    fips202::{shake256_init, KeccakState},
     hash::{Hash, Seed},
 };
 
-pub type Prng = KeccakState;
-
-pub fn prng_init(prng: &mut Prng, salt: Option<&Hash>, seed: Option<&Seed>) {
-    let mut input = [0u8; HASH_SIZE + SEED_SIZE];
-    prng.init();
-    // Set 'input = salt | seed'.
-    if let Some(salt) = salt {
-        input[..HASH_SIZE].copy_from_slice(salt);
-    }
-    if let Some(seed) = seed {
-        input[HASH_SIZE..].copy_from_slice(seed);
-    }
-    prng.keccak_absorb(&input);
-    prng.keccak_finalize(0x1F);
+pub struct Prng {
+    prng: KeccakState,
 }
 
-pub fn prng_bytes(prng: &mut Prng, out: &mut [u8], outlen: usize) {
-    prng.keccak_squeeze(out, outlen);
+impl Prng {
+    pub fn new(salt: &Option<Hash>, seed: &Option<Seed>) -> Self {
+        let mut input = [0u8; HASH_SIZE + SEED_SIZE];
+        let inlen = input.len();
+        let mut prng = shake256_init();
+        if let Some(salt) = salt {
+            input[..HASH_SIZE].copy_from_slice(salt);
+        }
+        if let Some(seed) = seed {
+            input[HASH_SIZE..].copy_from_slice(seed);
+        }
+        shake256_absorb(&mut prng, &mut input, inlen);
+        shake256_finalize(&mut prng);
+
+        Self { prng }
+    }
+
+    pub fn gen_bytes(&mut self, out: &mut [u8], outlen: usize) {
+        shake256_squeeze(&mut self.prng, out, outlen)
+        // self.prng.keccak_squeeze(out, outlen);
+    }
 }
